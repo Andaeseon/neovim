@@ -135,21 +135,20 @@ def insert_state(data, key):
 
 3, 4, 5의 일반 모드에서 설명한 기본 구조는 'state_enter` 루프에 의해 관리되는 다른 모드에 사용됩니다.
 
-- command-line mode: `command_line_{enter,check,execute}()`(`ex_getln.c`)
-- insert mode: `insert_{enter,check,execute}()`(`edit.c`)
-- terminal mode: `terminal_{enter,execute}()`(`terminal.c`)
+- command-line 모드 : `command_line_{enter,check,execute}()`(`ex_getln.c`)
+- insert 모드 : `insert_{enter,check,execute}()`(`edit.c`)
+- terminal 모드 : `terminal_{enter,execute}()`(`terminal.c`)
 
-### Async event support
+###  비동기 행사 지원
 
-One of the features Neovim added is the support for handling arbitrary
-asynchronous events, which can include:
+Neovim이 추가 한 기능 중 하나는 임의의 비동기 이벤트 처리 지원입니다. 
+다음과 같은 기능이 포함될 수 있습니다
 
-- msgpack-rpc requests
-- job control callbacks
-- timers (not implemented yet but the support code is already there)
+- msgpack-rpc 요청
+- 작업 제어 콜백
+- 타이머 (아직 구현되지 않았지만 지원 코드가 이미 있음)
 
-Neovim implements this functionality by entering another event loop while
-waiting for characters, so instead of:
+Neovim은 문자를 기다리는 동안 다른 이벤트 루프를 입력하여 이 기능을 구현합니다.
 
 ```py
 def state_enter(state_callback, data):
@@ -158,7 +157,7 @@ def state_enter(state_callback, data):
   while state_callback(data, key)   # invoke the callback for the current state
 ```
 
-Neovim program loop is more like:
+Neovim 프로그램 루프는 다음과 같습니다.
 
 ```py
 def state_enter(state_callback, data):
@@ -167,11 +166,10 @@ def state_enter(state_callback, data):
   while state_callback(data, event) # invoke the callback for the current state
 ```
 
-where `event` is something the operating system delivers to us, including (but
-not limited to) user input. The `read_next_event()` part is internally
-implemented by libuv, the platform layer used by Neovim.
+여기서 '이벤트'는 사용자 입력을 포함하여 운영 체제가 제공하는 것입니다 (그러나 이에 국한되지 않음). 
+`read_next_event ()`부분은 Neovim이 사용하는 플랫폼 계층인 libuv에 의해 내부적으로 구현됩니다.
 
-Since Neovim inherited its code from Vim, the states are not prepared to receive
-"arbitrary events", so we use a special key to represent those (When a state
-receives an "arbitrary event", it normally doesn't do anything other update the
-screen).
+
+Neovim은 Vim에서 코드를 상속 받았기 때문에 
+주에서는 "임의 이벤트"를 받을 준비가 되어 있지 않으므로 특별한 키를 사용하여 상태를 나타냅니다 
+(상태가 "임의의 이벤트"를 수신하면 일반적으로 다른 작업을 수행하지 않습니다.)
